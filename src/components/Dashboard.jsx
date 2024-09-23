@@ -1,5 +1,4 @@
-import React, { useState } from 'react';
-import UserDashboard from './shade/test';
+import React, { useState, useEffect } from 'react';
 
 export const Dashboard = () => {
   const [tables, setTables] = useState([
@@ -15,12 +14,8 @@ export const Dashboard = () => {
               <th className="px-4 py-2">Status</th>
             </tr>
           </thead>
-          <tbody>
-            <tr>
-              <td className="border px-4 py-2">1</td>
-              <td className="border px-4 py-2">Task 1</td>
-              <td className="border px-4 py-2">Done</td>
-            </tr>
+          <tbody id="sprint-goals-body">
+            {/* Sprint goals will be dynamically populated here */}
           </tbody>
         </table>
       ),
@@ -91,15 +86,22 @@ export const Dashboard = () => {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [formData, setFormData] = useState({});
   const [selectedTableIndex, setSelectedTableIndex] = useState(0);
+  const [sprintGoals, setSprintGoals] = useState([]);
+
+  useEffect(() => {
+    // Fetch Sprint Goals from FastAPI backend
+    fetch('http://127.0.0.1:8000/sprintgoals/')
+      .then((response) => response.json())
+      .then((data) => {
+        setSprintGoals(data);
+      })
+      .catch((error) => {
+        console.error('Error fetching sprint goals:', error);
+      });
+  }, []);
 
   const handleClick = (index) => {
     setSelectedTableIndex(index);
-    setTables((prevTables) => {
-      const newTables = [...prevTables];
-      const [clickedTable] = newTables.splice(index, 1);
-      newTables.unshift(clickedTable);
-      return newTables;
-    });
   };
 
   const togglePopup = () => {
@@ -135,16 +137,37 @@ export const Dashboard = () => {
           Add {currentTable.title.split(' ')[0]}
         </button>
       </div>
-      <div className="mb-6  border-4 p-4 bg-white shadow-md" style={{ height: '400px' }}>
-        {currentTable.content || <p>No content available</p>}
+      <div className="mb-6 border-4 p-4 bg-white shadow-md" style={{ height: '400px' }}>
+        {selectedTableIndex === 0 ? (
+          <table className="w-full text-left table-auto">
+            <thead className="bg-blue-200">
+              <tr>
+                <th className="px-4 py-2">Sl No</th>
+                <th className="px-4 py-2">Description</th>
+                <th className="px-4 py-2">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {sprintGoals.map((goal, index) => (
+                <tr key={goal.id}>
+                  <td className="border px-4 py-2">{index + 1}</td>
+                  <td className="border px-4 py-2">{goal.description}</td>
+                  <td className="border px-4 py-2">{goal.status}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          currentTable.content
+        )}
       </div>
       <div className="grid grid-cols-2 gap-4">
         {tables
-          .filter((_, index) => index !== selectedTableIndex) 
+          .filter((_, index) => index !== selectedTableIndex)
           .map((table, index) => (
             <div
               key={table.id}
-              onClick={() => handleClick(index + (index >= selectedTableIndex ? 1 : 0))} 
+              onClick={() => handleClick(index + (index >= selectedTableIndex ? 1 : 0))}
               className="cursor-pointer p-4 border rounded-md bg-white shadow-md"
             >
               <h3 className="text-xl font-semibold mb-2">{table.title}</h3>
@@ -206,11 +229,6 @@ export const Dashboard = () => {
           </div>
         </div>
       )}
-      <UserDashboard />
     </div>
   );
 };
-
-
-
-
