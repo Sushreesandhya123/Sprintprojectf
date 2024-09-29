@@ -59,8 +59,6 @@ const Sprintdetails = () => {
             </label>
           </div>
         </div>
-
-        {/* Second Column: Display Uploaded Image */}
         <div className="border-2 border-gray-300 p-4 flex justify-center items-center">
           {imageSrc ? (
             <img src={imageSrc} alt="Uploaded" className="max-h-64 object-contain" />
@@ -69,8 +67,6 @@ const Sprintdetails = () => {
           )}
         </div>
       </div>
-
-      {/* Below Row: Production Pipeline Releases Table */}
       <div className="bg-white shadow-md rounded p-4 relative">
         <h2 className="text-xl font-bold mb-4">Production Pipeline Releases</h2>
         <button
@@ -114,8 +110,6 @@ const Sprintdetails = () => {
           </tbody>
         </table>
       </div>
-
-      {/* Popup Form */}
       {showPopup && (
         <div className="fixed inset-0 bg-gray-800 bg-opacity-75 flex justify-center items-center">
           <div className="bg-white p-6 rounded shadow-lg w-96">
