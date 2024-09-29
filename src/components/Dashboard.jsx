@@ -47,7 +47,7 @@ export const Dashboard = () => {
 
   const fetchData = async () => {
     try {
-      const response = await fetch('http://127.0.0.1:8000/sprintgoals/');
+      const response = await fetch('http://127.0.0.1:8000/Sprintgoal/sprintgoals/');
       const data = await response.json();
 
       const sprintGoalsContent = (
@@ -104,7 +104,6 @@ export const Dashboard = () => {
             </tr>
           </thead>
           <tbody>
-            {/* Add your data fetching logic for this table */}
           </tbody>
         </table>
       );
@@ -134,7 +133,7 @@ export const Dashboard = () => {
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this item?")) {
       try {
-        const response = await fetch(`http://127.0.0.1:8000/sprintgoals/${id}`, {
+        const response = await fetch(`http://127.0.0.1:8000/Sprintgoal/sprintgoals/${id}`, {
           method: 'DELETE',
         });
 
@@ -163,7 +162,7 @@ export const Dashboard = () => {
 
     try {
       if (isEditMode) {
-        const response = await fetch(`http://127.0.0.1:8000/sprintgoals/${formData.id}/`, {
+        const response = await fetch(`http://127.0.0.1:8000/Sprintgoal/sprintgoals/${formData.id}/`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -176,7 +175,7 @@ export const Dashboard = () => {
           fetchData(); // Refresh data
         }
       } else {
-        const response = await fetch('http://127.0.0.1:8000/sprintgoals/', {
+        const response = await fetch('http://127.0.0.1:8000/Sprintgoal/sprintgoals/', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

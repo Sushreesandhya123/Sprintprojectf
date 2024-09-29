@@ -23,15 +23,15 @@ export const DASHBOARD_SIDEBAR_LINKS = [
 		icon: <HiOutlineCube />
 	},
 	{
-		key: 'orders',
-		label: 'Sprint Velocity',
-		// path: '/orders',
+		key: 'team',
+		label: 'Team',
+		path: '/Team',
 		icon: <HiOutlineShoppingCart />
 	},
 	{
-		key: 'customers',
-		label: 'Retrospective',
-		// path: '/customers',
+		key: 'sprint',
+		label: 'Sprint',
+		path: '/Sprint',
 		icon: <HiOutlineUsers />
 	},
 ]
