@@ -1,10 +1,9 @@
 import {
 	HiOutlineViewGrid,
 	HiOutlineCube,
-	HiOutlineShoppingCart,
-	HiOutlineUsers,
-	HiOutlineDocumentText,
-	HiOutlineAnnotation,
+	HiOutlineTrendingUp,
+	HiOutlineChartSquareBar,
+	HiOutlineBan,
 	HiOutlineQuestionMarkCircle,
 	HiOutlineCog
 } from 'react-icons/hi'
@@ -13,26 +12,32 @@ export const DASHBOARD_SIDEBAR_LINKS = [
 	{
 		key: 'dashboard',
 		label: 'Dashboard',
-		path: '/',
+		path: '/Dashboard',
 		icon: <HiOutlineViewGrid />
 	},
 	{
 		key: 'sprintstatus',
 		label: 'Sprint Status',
-		path: '/Sprintdetails',
+		path: '/Sprintstatus',
 		icon: <HiOutlineCube />
 	},
 	{
-		key: 'team',
-		label: 'Team',
-		path: '/Team',
-		icon: <HiOutlineShoppingCart />
+		key: 'blockers',
+		label: 'Blockers',
+		path: '/Sprintdetails',
+		icon: <HiOutlineBan />,
 	},
 	{
-		key: 'sprint',
-		label: 'Sprint',
-		path: '/Sprint',
-		icon: <HiOutlineUsers />
+		key: 'velocity',
+		label: 'Velocity',
+		path: '/Team',
+		icon: <HiOutlineTrendingUp />,
+	},
+	{
+		key: 'productionpipeline',
+		label: 'Pipelines',
+		// path: '/Sprint',
+		icon: <HiOutlineChartSquareBar />
 	},
 ]
 

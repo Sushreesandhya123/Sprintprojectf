@@ -1,25 +1,28 @@
 import React, { useState, useEffect } from 'react';
 
-export const Dashboard = () => {
+export const Sprintstatus = () => {
   const [tables, setTables] = useState([
     {
       id: 1,
       title: 'Sprint Goals',
-      content: null, 
+      content: null,
       popupFields: [
         { name: 'description', label: 'Description' },
-        { name: 'status', label: 'Status', type: 'select', options: ['Done', 'Blocking', 'Pending'] },
+        { name: 'status', label: 'Status', type: 'select', options: ['Done', 'Backlog', 'Pending'] },
       ],
     },
     {
       id: 2,
-      title: 'Individual Sprint Performance',
+      title: 'Sprint Progress',
       content: null,
       popupFields: [
-        { name: 'name', label: 'Name' },
-        { name: 'planned', label: 'Planned Story Points' },
-        { name: 'completed', label: 'Completed Story Points' },
-        { name: 'incomplete', label: 'Incomplete Story Points' },
+        { name: 'planned_user_stories', label: 'Planned US' },
+        { name: 'completed_user_stories', label: 'Completed US' },
+        { name: 'incomplete_user_stories', label: 'Incomplete US' },
+        { name: 'total_team_capacity', label: 'Total Team Capacity' },
+        { name: 'planned_story_points', label: 'Planned SP' },
+        { name: 'completed_story_points', label: 'Completed SP' },
+        { name: 'incomplete_story_points', label: 'Incomplete SP' },
       ],
     },
     {
@@ -34,19 +37,22 @@ export const Dashboard = () => {
   ]);
 
   const [isPopupOpen, setIsPopupOpen] = useState(false);
-  const [isEditDeletePopupOpen, setIsEditDeletePopupOpen] = useState(true);
   const [selectedRowIndex, setSelectedRowIndex] = useState(null);
   const [formData, setFormData] = useState({});
   const [selectedTableIndex, setSelectedTableIndex] = useState(0);
   const [isEditMode, setIsEditMode] = useState(false);
+  const [sprintProgressData, setSprintProgressData] = useState([]);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await fetch('http://127.0.0.1:8000/sprintgoals/');
-        const data = await response.json();
-  
-        const sprintGoalsContent = (
+  const handleTableClick = (index) => {
+    setSelectedTableIndex(index);
+  };
+
+  const fetchData = async () => {
+    try {
+      const goalsResponse = await fetch('http://127.0.0.1:8000/Sprintgoal/sprintgoals/');
+      const goalsData = await goalsResponse.json();
+      const sprintGoalsContent = (
+        <div className="overflow-y-auto h-full">
           <table className="w-full text-left table-auto">
             <thead className="bg-blue-200">
               <tr>
@@ -57,64 +63,67 @@ export const Dashboard = () => {
               </tr>
             </thead>
             <tbody>
-              {data.map((item, index) => (
+              {goalsData.map((item) => (
                 <tr key={item.id}>
-                  <td className="border px-4 py-2 text-center">{index + 1}</td>
+                  <td className="border px-4 py-2 text-center">{item.id}</td>
                   <td className="border px-4 py-2 text-center">{item.description}</td>
                   <td className="border px-4 py-2 text-center">{item.status}</td>
                   <td className="border px-4 py-2 text-center">
-                    <i
-                      className="fa-solid fa-edit cursor-pointer text-green-500 mr-2"
-                      onClick={() => handleEdit(item.id)}
-                    ></i>
-                    <i
-                      className="fa-solid fa-trash cursor-pointer text-red-500"
-                      onClick={() => handleDelete(item.id)}
-                    ></i>
+                    <i className="fa-solid fa-edit cursor-pointer text-green-500 mr-2" onClick={() => handleEdit(item)}></i>
+                    <i className="fa-solid fa-trash cursor-pointer text-red-500" onClick={() => handleDelete(item.id)}></i>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
-        );
-  
-        const individualSprintPerformanceContent = (
+        </div>
+      );
+
+      // Fetching sprint progress data
+      const progressResponse = await fetch('http://127.0.0.1:8000/Sprintprogress/sprintprogress/');
+      const progressData = await progressResponse.json();
+      setSprintProgressData(progressData); // Store the fetched sprint progress data
+
+      const sprintProgressContent = (
+        <div className="overflow-auto h-64">
           <table className="w-full text-left table-auto">
             <thead className="bg-green-200">
               <tr>
                 <th className="px-4 py-2">Id</th>
-                <th className="px-4 py-2">Name</th>
-                <th className="px-4 py-2">Planned Story Points</th>
-                <th className="px-4 py-2">Completed Story Points</th>
-                <th className="px-4 py-2">Incomplete Story Points</th>
+                <th className="px-4 py-2">Planned US</th>
+                <th className="px-4 py-2">Completed US</th>
+                <th className="px-4 py-2">Incomplete US</th>
+                <th className="px-4 py-2">Total Team Capacity</th>
+                <th className="px-4 py-2">Planned SP</th>
+                <th className="px-4 py-2">Completed SP</th>
+                <th className="px-4 py-2">Incomplete SP</th>
                 <th className="px-4 py-2 text-center">Action</th>
               </tr>
             </thead>
             <tbody>
-              {data.map((item, index) => (
+              {sprintProgressData.map((item) => (
                 <tr key={item.id}>
-                  <td className="border px-4 py-2">{index + 1}</td>
-                  <td className="border px-4 py-2">{item.name}</td>
-                  <td className="border px-4 py-2">{item.planned}</td>
-                  <td className="border px-4 py-2">{item.completed}</td>
-                  <td className="border px-4 py-2">{item.incomplete}</td>
+                  <td className="border px-4 py-2">{item.id}</td>
+                  <td className="border px-4 py-2">{item.planned_user_stories}</td>
+                  <td className="border px-4 py-2">{item.completed_user_stories}</td>
+                  <td className="border px-4 py-2">{item.incomplete_user_stories}</td>
+                  <td className="border px-4 py-2">{item.total_team_capacity}</td>
+                  <td className="border px-4 py-2">{item.planned_story_points}</td>
+                  <td className="border px-4 py-2">{item.completed_story_points}</td>
+                  <td className="border px-4 py-2">{item.incomplete_story_points}</td>
                   <td className="border px-4 py-2 text-center">
-                    <i
-                      className="fa-solid fa-edit cursor-pointer text-green-500 mr-2"
-                      onClick={() => handleEdit(index)}
-                    ></i>
-                    <i
-                      className="fa-solid fa-trash cursor-pointer text-red-500"
-                      onClick={() => handleDelete(index)}
-                    ></i>
+                    <i className="fa-solid fa-edit cursor-pointer text-green-500 mr-2" onClick={() => handleEditProgress(item)}></i>
+                    <i className="fa-solid fa-trash cursor-pointer text-red-500" onClick={() => handleDeleteProgress(item.id)}></i>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
-        );
-  
-        const teamVelocityContent = (
+        </div>
+      );
+
+      const teamVelocityContent = (
+        <div className="overflow-auto h-64">
           <table className="w-full text-left table-auto">
             <thead className="bg-yellow-200">
               <tr>
@@ -124,168 +133,145 @@ export const Dashboard = () => {
               </tr>
             </thead>
             <tbody>
-              {data.map((item, index) => (
-                <tr key={item.id}>
-                  <td className="border px-4 py-2">{item.sprint}</td>
-                  <td className="border px-4 py-2">{item.velocity}</td>
-                  <td className="border px-4 py-2 text-center">
-                    <i
-                      className="fa-solid fa-edit cursor-pointer text-green-500 mr-2"
-                      onClick={() => handleEdit(index)}
-                    ></i>
-                    <i
-                      className="fa-solid fa-trash cursor-pointer text-red-500"
-                      onClick={() => handleDelete(index)}
-                    ></i>
-                  </td>
-                </tr>
-              ))}
             </tbody>
           </table>
-        );
-  
-        const updatedTables = [
-          { ...tables[0], content: sprintGoalsContent },
-          { ...tables[1], content: individualSprintPerformanceContent },
-          { ...tables[2], content: teamVelocityContent },
-        ];
-  
-        setTables(updatedTables);
-      } catch (error) {
-        console.error('Error fetching sprint goals:', error);
-      }
-    };
-  
+        </div>
+      );
+
+      const updatedTables = [
+        { ...tables[0], content: sprintGoalsContent },
+        { ...tables[1], content: sprintProgressContent },
+        { ...tables[2], content: teamVelocityContent },
+      ];
+
+      setTables(updatedTables);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  };
+
+  useEffect(() => {
     fetchData();
   }, []);
-  
-
-  const handleClick = (index) => {
-    setSelectedTableIndex(index);
-    setTables((prevTables) => {
-      const newTables = [...prevTables];
-      const [clickedTable] = newTables.splice(index, 1);
-      newTables.unshift(clickedTable);
-      return newTables;
-    });
-  };
 
   const togglePopup = () => {
     setIsPopupOpen(!isPopupOpen);
     setFormData({});
+    setIsEditMode(false);
   };
 
   const handleDelete = async (id) => {
-    if (id > 0) {
-      if (window.confirm("Are you sure to delete this item?")) {
-        try {
-          const response = await fetch(`http://127.0.0.1:8000/sprintgoals/${id}`, {
-            method: 'DELETE',
-          });
-  
-          if (response.ok) {
-            const dt = tables.filter(item => item.id !== id);
-            setTables(dt);
-          } else {
-            console.error("Failed to delete item from server");
-          }
-        } catch (error) {
-          console.error("Error during deletion:", error);
+    if (window.confirm("Are you sure you want to delete this item?")) {
+      try {
+        const response = await fetch(`http://127.0.0.1:8000/Sprintgoal/sprintgoals/${id}`, {
+          method: 'DELETE',
+        });
+
+        if (response.ok) {
+          fetchData(); // Refresh data after deletion
         }
+      } catch (error) {
+        console.error('Error deleting item:', error);
       }
     }
-  
-    setIsEditDeletePopupOpen(true);
   };
 
-  const handleEdit = () => {
-    const currentRowData = getRowDataForEdit(); 
-    setFormData(currentRowData); 
-    setIsEditDeletePopupOpen(true);
-    setIsEditMode(true); 
-    setIsPopupOpen(true); 
+  // CRUD for Sprint Progress
+  const handleEditProgress = (item) => {
+    setIsEditMode(true);
+    setFormData({
+      id: item.id,
+      planned_user_stories: item.planned_user_stories,
+      completed_user_stories: item.completed_user_stories,
+      incomplete_user_stories: item.incomplete_user_stories,
+      total_team_capacity: item.total_team_capacity,
+      planned_story_points: item.planned_story_points,
+      completed_story_points: item.completed_story_points,
+      incomplete_story_points: item.incomplete_story_points,
+    });
+    setIsPopupOpen(true);
   };
 
-  const getRowDataForEdit = () => {
-    const table = tables[selectedTableIndex];
-    return {
-      description: 'Task 1', // Replace with actual data
-      status: 'Done', // Replace with actual data
-    };
+  const handleDeleteProgress = async (id) => {
+    if (window.confirm("Are you sure you want to delete this Sprint Progress?")) {
+      try {
+        const response = await fetch(`http://127.0.0.1:8000/Sprintprogress/sprintprogress/${id}`, {
+          method: 'DELETE',
+        });
+
+        if (response.ok) {
+          fetchData(); // Refresh data after deletion
+        }
+      } catch (error) {
+        console.error('Error deleting Sprint Progress:', error);
+      }
+    }
   };
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
+  const handleFormSubmit = async (event) => {
+    event.preventDefault();
+    const method = isEditMode ? 'PUT' : 'POST';
+    const url = isEditMode
+      ? `http://127.0.0.1:8000/Sprintprogress/sprintprogress/${formData.id}`
+      : `http://127.0.0.1:8000/Sprintprogress/sprintprogress/`;
+
+    try {
+      const response = await fetch(url, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (response.ok) {
+        togglePopup();
+        fetchData(); // Refresh data after submission
+      }
+    } catch (error) {
+      console.error('Error submitting form:', error);
+    }
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log('Form submitted:', formData);
-    setFormData({});
+  const handleEdit = (item) => {
+    setSelectedRowIndex(item.id);
+    setFormData(item);
+    setIsEditMode(true);
     togglePopup();
   };
 
-  const currentTable = tables[selectedTableIndex];
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setFormData({ ...formData, [name]: value });
+  };
 
   return (
-    <div className="p-4">
-    <div className="flex justify-between items-center mb-4">
-      <h2 className="text-2xl font-bold">{currentTable.title || 'No Table Available'}</h2>
-      <button
-        className="bg-blue-500 text-white py-2 px-4 rounded"
-        onClick={() => {
-          setIsEditMode(false);
-          setFormData({});
-          setIsPopupOpen(true);
-        }}
-      >
-        Submit {currentTable.title.split(' ')[0]}
-      </button>
-    </div>
-    <div className="mb-6 border-4 bg-white shadow-md" style={{ height: '400px' }}>
-      <div className="overflow-y-scroll h-full">
-        {currentTable.content || <p>No content available</p>}
-      </div>
-    </div>
-    <div className="grid grid-cols-2 gap-4">
-      {tables
-        .filter((_, index) => index !== selectedTableIndex)
-        .map((table, index) => (
-          <div
-            key={table.id}
-            onClick={() => handleClick(index + (index >= selectedTableIndex ? 1 : 0))}
-            className="cursor-pointer p-4 border rounded-md bg-white shadow-md"
-          >
-            <h3 className="text-xl font-semibold mb-2">{table.title}</h3>
-            <div className="overflow-y-scroll h-48"> {/* Set height for scrolling */}
-              {table.content}
-            </div>
+    <div>
+      <h1 className="text-2xl font-bold">Sprint Status</h1>
+      <div className="grid grid-cols-3 gap-4 mt-4">
+        {tables.map((table, index) => (
+          <div key={table.id} className={`border p-4 ${selectedTableIndex === index ? 'bg-blue-100' : ''}`} onClick={() => handleTableClick(index)}>
+            <h2 className="font-semibold text-lg">{table.title}</h2>
+            {table.content}
+            <button onClick={togglePopup} className="mt-2 bg-blue-500 text-white px-4 py-2 rounded">Add {table.title}</button>
           </div>
         ))}
-    </div>
+      </div>
 
-      {/* Add/Edit Entry Popup */}
       {isPopupOpen && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white p-8 rounded-lg shadow-lg w-1/3">
-            <h2 className="text-2xl font-bold mb-4">
-              {isEditMode ? 'Edit Entry' : 'Add Entry'} {currentTable.title.split(' ')[0]}
-            </h2>
-            <form onSubmit={handleSubmit}>
-              {currentTable.popupFields.map((field) => (
-                <div className="mb-4" key={field.name}>
-                  <label className="block text-gray-700">{field.label}:</label>
+        <div className="fixed inset-0 flex items-center justify-center z-50">
+          <div className="bg-white p-4 rounded shadow-lg">
+            <h2 className="text-xl font-bold">{isEditMode ? 'Edit Entry' : 'Add Entry'}</h2>
+            <form onSubmit={handleFormSubmit}>
+              {tables[selectedTableIndex].popupFields.map((field) => (
+                <div key={field.name} className="mb-2">
+                  <label className="block">{field.label}</label>
                   {field.type === 'select' ? (
                     <select
                       name={field.name}
                       value={formData[field.name] || ''}
-                      onChange={handleInputChange}
-                      className="w-full px-3 py-2 border rounded"
-                      required
+                      onChange={handleChange}
+                      className="border border-gray-300 rounded p-1 w-full"
                     >
                       {field.options.map((option) => (
                         <option key={option} value={option}>
@@ -298,28 +284,14 @@ export const Dashboard = () => {
                       type="text"
                       name={field.name}
                       value={formData[field.name] || ''}
-                      onChange={handleInputChange}
-                      className="w-full px-3 py-2 border rounded"
-                      required
+                      onChange={handleChange}
+                      className="border border-gray-300 rounded p-1 w-full"
                     />
                   )}
                 </div>
               ))}
-              <div className="flex justify-end">
-                <button
-                  type="button"
-                  onClick={togglePopup}
-                  className="bg-gray-500 text-white py-2 px-4 rounded mr-2"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="bg-blue-500 text-white py-2 px-4 rounded"
-                >
-                  {isEditMode ? 'Save' : 'Submit'}
-                </button>
-              </div>
+              <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">{isEditMode ? 'Update' : 'Add'}</button>
+              <button type="button" onClick={togglePopup} className="bg-gray-300 text-black px-4 py-2 rounded ml-2">Cancel</button>
             </form>
           </div>
         </div>
@@ -327,5 +299,3 @@ export const Dashboard = () => {
     </div>
   );
 };
-
-

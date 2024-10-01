@@ -1,288 +1,303 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
+import { FaEdit, FaTrash } from "react-icons/fa"; // Import icons
 
 export const Dashboard = () => {
-  const [tables, setTables] = useState([
-    {
-      id: 1,
-      title: 'Sprint Goals',
-      content: null,
-      popupFields: [
-        { name: 'description', label: 'Description' },
-        { name: 'status', label: 'Status', type: 'select', options: ['Done', 'Backlog', 'Pending'] },
-      ],
-    },
-    {
-      id: 2,
-      title: 'Individual Sprint Performance',
-      content: null,
-      popupFields: [
-        { name: 'name', label: 'Name' },
-        { name: 'planned', label: 'Planned Story Points' },
-        { name: 'completed', label: 'Completed Story Points' },
-        { name: 'incomplete', label: 'Incomplete Story Points' },
-      ],
-    },
-    {
-      id: 3,
-      title: 'Team Velocity',
-      content: null,
-      popupFields: [
-        { name: 'sprint', label: 'Sprint' },
-        { name: 'velocity', label: 'Velocity (SP)' },
-      ],
-    },
-  ]);
-
   const [isPopupOpen, setIsPopupOpen] = useState(false);
-  const [selectedRowIndex, setSelectedRowIndex] = useState(null);
-  const [formData, setFormData] = useState({});
-  const [selectedTableIndex, setSelectedTableIndex] = useState(0);
-  const [isEditMode, setIsEditMode] = useState(false);
+  const [isEditing, setIsEditing] = useState(false); // State to track if editing
+  const [formData, setFormData] = useState({
+    name: "",
+    planned: "",
+    completed: "",
+    incomplete: "",
+  }); // Form data state
+  const [data, setData] = useState([]); // State for table data
+  const [currentId, setCurrentId] = useState(null); 
 
-  const handleTableClick = (index) => {
-    setSelectedTableIndex(index);
-  };
-
-  const fetchData = async () => {
+  // Fetch all individual performances (GET request)
+  const fetchIndividualPerformance = async () => {
     try {
-      const response = await fetch('http://127.0.0.1:8000/Sprintgoal/sprintgoals/');
-      const data = await response.json();
-      const sprintGoalsContent = (
-        <div className="overflow-y-auto h-full">
-          <table className="w-full text-left table-auto">
-            <thead className="bg-blue-200">
-              <tr>
-                <th className="px-4 py-2 text-center">Id</th>
-                <th className="px-4 py-2 text-center">Description</th>
-                <th className="px-4 py-2 text-center">Status</th>
-                <th className="px-4 py-2 text-center">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.map((item) => ( 
-                <tr key={item.id}>
-                  <td className="border px-4 py-2 text-center">{item.id}</td>
-                  <td className="border px-4 py-2 text-center">{item.description}</td>
-                  <td className="border px-4 py-2 text-center">{item.status}</td>
-                  <td className="border px-4 py-2 text-center">
-                    <i className="fa-solid fa-edit cursor-pointer text-green-500 mr-2" onClick={() => handleEdit(item)}></i>
-                    <i className="fa-solid fa-trash cursor-pointer text-red-500" onClick={() => handleDelete(item.id)}></i>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      );
-      const individualSprintPerformanceContent = (
-        <div className="overflow-auto h-64">
-          <table className="w-full text-left table-auto">
-            <thead className="bg-green-200">
-              <tr>
-                <th className="px-4 py-2">Id</th>
-                <th className="px-4 py-2">Name</th>
-                <th className="px-4 py-2">Planned Story Points</th>
-                <th className="px-4 py-2">Completed Story Points</th>
-                <th className="px-4 py-2">Incomplete Story Points</th>
-                <th className="px-4 py-2 text-center">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {/* Add your data fetching logic for this table */}
-            </tbody>
-          </table>
-        </div>
-      );
-
-      const teamVelocityContent = (
-        <div className="overflow-auto h-64"> {/* Set fixed height and enable overflow */}
-          <table className="w-full text-left table-auto">
-            <thead className="bg-yellow-200">
-              <tr>
-                <th className="px-4 py-2">Sprint</th>
-                <th className="px-4 py-2">Velocity (SP)</th>
-                <th className="px-4 py-2 text-center">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-            </tbody>
-          </table>
-        </div>
-      );
-
-      const updatedTables = [
-        { ...tables[0], content: sprintGoalsContent },
-        { ...tables[1], content: individualSprintPerformanceContent },
-        { ...tables[2], content: teamVelocityContent },
-      ];
-
-      setTables(updatedTables);
-    } catch (error) {
-      console.error('Error fetching sprint goals:', error);
-    }
-  };
-
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  const togglePopup = () => {
-    setIsPopupOpen(!isPopupOpen);
-    setFormData({});
-    setIsEditMode(false);
-  };
-
-  const handleDelete = async (id) => {
-    if (window.confirm("Are you sure you want to delete this item?")) {
-      try {
-        const response = await fetch(`http://127.0.0.1:8000/Sprintgoal/sprintgoals/${id}`, {
-          method: 'DELETE',
-        });
-
-        if (response.ok) {
-          fetchData(); // Refresh data after deletion
-        }
-      } catch (error) {
-        console.error('Error deleting item:', error);
+      const response = await fetch("http://127.0.0.1:8000/Individualperformance/individualperformance/");
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
       }
+      const result = await response.json();
+      console.log("Fetched Data:", result);  // Log the fetched data
+      setData(result); // Store fetched data in state
+    } catch (error) {
+      console.error("Error fetching data:", error);
     }
   };
 
-  const handleEdit = (item) => {
-    setIsEditMode(true);
-    setFormData({
-      id: item.id,
-      description: item.description,
-      status: item.status,
-    });
+  // Handle opening the popup
+  const openPopup = (data = null) => {
+    if (data) {
+      setFormData({
+        name: data.member_name,
+        planned: data.planned_story_points,
+        completed: data.completed_story_points,
+        incomplete: data.incomplete_story_points,
+      });
+      setCurrentId(data.performance_id); // Store the ID separately for PUT requests
+      setIsEditing(true);
+    } else {
+      setFormData({
+        name: "",
+        planned: "",
+        completed: "",
+        incomplete: "",
+      });
+      setCurrentId(null); // Reset the ID for POST requests
+      setIsEditing(false);
+    }
     setIsPopupOpen(true);
   };
+  
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    const { description, status } = formData;
+  // Close the popup
+  const closePopup = () => {
+    setIsPopupOpen(false);
+    setFormData({
+      name: "",
+      planned: "",
+      completed: "",
+      incomplete: "",
+    });
+  };
 
+  // Handle form input changes
+  const handleInputChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  // Handle form submission (POST or PUT request)
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (isEditing) {
+      // Update individual performance (PUT request)
+      try {
+        const response = await fetch(
+          `http://127.0.0.1:8000/Individualperformance/individualperformance/${currentId}`, // Use currentId for PUT
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              member_name: formData.name,
+              planned_story_points: formData.planned,
+              completed_story_points: formData.completed,
+              incomplete_story_points: formData.incomplete,
+            }),
+          }
+        );
+        if (response.ok) {
+          fetchIndividualPerformance(); // Refresh data after updating
+          closePopup();
+        } else {
+          const errorData = await response.json();
+          console.error("Error updating individual performance:", errorData);
+        }
+      } catch (error) {
+        console.error("Error updating individual performance:", error);
+      }
+    } else {
+      // Create new individual performance (POST request)
+      try {
+        const response = await fetch(
+          "http://127.0.0.1:8000/Individualperformance/individualperformance/",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              member_name: formData.name,
+              planned_story_points: formData.planned,
+              completed_story_points: formData.completed,
+              incomplete_story_points: formData.incomplete,
+            }),
+          }
+        );
+        if (response.ok) {
+          fetchIndividualPerformance(); // Refresh data after creating
+          closePopup();
+        } else {
+          const errorData = await response.json();
+          console.error("Error creating individual performance:", errorData);
+        }
+      } catch (error) {
+        console.error("Error creating individual performance:", error);
+      }
+    }
+  };
+  
+
+  // Handle delete action (DELETE request)
+  const handleDelete = async (id) => {
     try {
-      if (isEditMode) {
-        const response = await fetch(`http://127.0.0.1:8000/Sprintgoal/sprintgoals/${formData.id}/`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ description, status }),
-        });
-
-        if (response.ok) {
-          togglePopup();
-          fetchData(); // Refresh data
+      const response = await fetch(
+        `http://127.0.0.1:8000/Individualperformance/individualperformance/${id}`,
+        {
+          method: "DELETE",
         }
-      } else {
-        const response = await fetch('http://127.0.0.1:8000/Sprintgoal/sprintgoals/', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ description, status }),
-        });
-
-        if (response.ok) {
-          togglePopup();
-          fetchData(); // Refresh data
-        }
+      );
+      if (response.ok) {
+        fetchIndividualPerformance(); // Refresh data after deleting
       }
     } catch (error) {
-      console.error('Error saving data:', error);
+      console.error("Error deleting individual performance:", error);
     }
   };
 
-  const handleChange = (event) => {
-    const { name, value } = event.target;
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
-  };
+  // Fetch data on component mount
+  useEffect(() => {
+    fetchIndividualPerformance();
+  }, []);
 
   return (
-    <div className="p-2">
-      <h1 className="text-2xl font-bold mb-2">Dashboard</h1>
+    <div className="p-4 bg-gray-100">
+      {/* Team Name Section */}
+      <h1 className="text-3xl font-bold text-left mb-2">Team Name</h1>
 
-      {/* Table buttons */}
-      <div className="flex justify-between mb-2">
-        <div className="flex space-x-4">
-          {tables.map((table, index) => (
-            <button
-              key={table.id}
-              className={`py-2 px-4 rounded ${selectedTableIndex === index ? 'bg-cyan-600 text-white' : 'bg-gray-300'}`}
-              onClick={() => handleTableClick(index)}
-            >
-              {table.title}
-            </button>
-          ))}
+      {/* Scrum Master and Sprint Duration Row */}
+      <div className="flex justify-between mb-4">
+        <div className="w-1/2">
+          <h2 className="text-xl font-semibold">Scrum Master: Jane Doe</h2>
         </div>
-        
-        {/* Right-aligned button */}
-        <button
-          className="bg-cyan-600 text-white py-2 px-4 rounded"
-          onClick={togglePopup}
-        >
-          {tables[selectedTableIndex]?.title === 'Sprint Goals' ? 'Add Sprint Goal' : 
-           tables[selectedTableIndex]?.title === 'Individual Sprint Performance' ? 'Add Performance' : 
-           'Add Velocity'}
-        </button>
+        <div className="w-1/2 text-right">
+          <h2 className="text-xl font-semibold">Sprint Duration: 2 weeks</h2>
+        </div>
       </div>
 
-      {/* Display selected table content */}
-      <div className="border p-4 bg-white w-full" style={{ height: '500px' }}>
-        {tables[selectedTableIndex].content}
-      </div>
-
-      {/* Popup for adding/editing items */}
-  {isPopupOpen && (
-    <div className="fixed inset-0 flex items-center justify-center z-50">
-      <div className="bg-white p-8 rounded shadow-lg w-1/3"> {/* Adjusted padding and width */}
-        <h2 className="text-xl font-bold mb-4">{isEditMode ? 'Edit Item' : 'Add Item'}</h2>
-        <form onSubmit={handleSubmit}>
-          {tables[selectedTableIndex].popupFields.map((field) => (
-            <div key={field.name} className="mb-4">
-              <label className="block mb-2">{field.label}</label>
-              {field.type === 'select' ? (
-                <select
-                  name={field.name}
-                  value={formData[field.name] || ''}
-                  onChange={handleChange}
-                  required
-                  className="border p-2 w-full h-12 text-lg" // Adjusted height and font size for the dropdown
-                >
-                  <option value="" disabled>Select Status</option>
-                  {field.options.map((option, index) => (
-                    <option key={index} value={option}>{option}</option>
-                  ))}
-                </select>
-              ) : (
-                <input
-                  type="text"
-                  name={field.name}
-                  value={formData[field.name] || ''}
-                  onChange={handleChange}
-                  className="border p-2 w-full h-12 text-lg" // Adjusted height and font size for the input
-                  required
-                />
-              )}
+      {/* Cards with Icons and Bubbles */}
+      <div className="grid grid-cols-3 gap-6 mb-8">
+        {[{ title: "Planned User Stories", value: 10 }, { title: "Completed User Stories", value: 8 }, { title: "Incomplete User Stories", value: 2 }].map((card, index) => (
+          <div key={index} className="relative p-8 bg-white rounded-lg shadow-lg  transition duration-300 overflow-hidden h-40">
+            {/* Card Content */}
+            <div className="flex justify-between items-center relative z-10 h-full">
+              <div className="text-left">
+                <h3 className="text-xl font-semibold">{card.title}</h3>
+                <p className="text-gray-600 text-2xl font-bold text-center">{card.value}</p>
+              </div>
+              <div className="text-white bg-blue-500 w-12 h-12 rounded-full flex items-center justify-center">Icon</div>
             </div>
-          ))}
-          <div className="flex justify-end">
-            <button type="button" className="bg-red-500 text-white px-4 py-2 rounded mr-2" onClick={togglePopup}>
-              Cancel
-            </button>
-            <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">
-              {isEditMode ? 'Update' : 'Add'}
+            {/* Bubble Designs */}
+            <div className="absolute -top-10 -right-10 w-24 h-24 bg-blue-400 rounded-full opacity-30"></div>
+            <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-purple-400 rounded-full opacity-30"></div>
+          </div>
+        ))}
+      </div>
+
+      {/* Single Card for Table */}
+      <div className="grid grid-cols-1 gap-6 mb-8">
+        <div className="p-4 bg-white rounded-lg shadow-lg  transition duration-100 flex flex-col">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-lg font-semibold">IndividualPerformance</h3>
+            <button onClick={() => openPopup()} className="bg-blue-500 text-white py-2 px-3 rounded-md hover:bg-blue-600 transition">
+              Create
             </button>
           </div>
-        </form>
+
+          {/* Table for Individual Performance */}
+          <div className="overflow-y-auto h-full">
+            <table className="w-full text-left table-auto">
+              <thead className="bg-blue-200">
+                <tr>
+                  <th className="border px-4 py-2">ID</th>
+                  <th className="border px-4 py-2">Name</th>
+                  <th className="border px-4 py-2">Planned Story Point</th>
+                  <th className="border px-4 py-2">Completed Story Point</th>
+                  <th className="border px-4 py-2">Incomplete Story Point</th>
+                  <th className="border px-4 py-2">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {data.map((item) => (
+                  <tr key={item.performance_id}>
+                    <td className="border px-4 py-2 text-center">{item.performance_id}</td>
+                    <td className="border px-4 py-2 text-center">{item.member_name}</td>
+                    <td className="border px-4 py-2 text-center">{item.planned_story_points}</td>
+                    <td className="border px-4 py-2 text-center">{item.completed_story_points}</td>
+                    <td className="border px-4 py-2 text-center">{item.incomplete_story_points}</td>
+                    <td className="border px-4 py-2 text-center">
+                      <button onClick={() => openPopup(item)} className="text-blue-500 hover:text-blue-700">
+                        <FaEdit />
+                      </button>
+                      <button onClick={() => handleDelete(item.performance_id)} className="text-red-500 hover:text-red-700 ml-4">
+                        <FaTrash />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+
+            </table>
+          </div>
+        </div>
       </div>
-    </div>
- )}
+
+      {/* Popup Form */}
+      {isPopupOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-1/3">
+            <h2 className="text-2xl font-bold mb-4">{isEditing ? "Edit Individual Performance" : "Add Individual Performance"}</h2>
+            <form onSubmit={handleSubmit}>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  required
+                  className="w-full py-2 px-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-300 transition duration-200 ease-in-out"
+                />
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Planned Story Points</label>
+                <input
+                  type="number"
+                  name="planned"
+                  value={formData.planned}
+                  onChange={handleInputChange}
+                  required
+                  className="w-full py-2 px-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-300 transition duration-200 ease-in-out"
+                />
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Completed Story Points</label>
+                <input
+                  type="number"
+                  name="completed"
+                  value={formData.completed}
+                  onChange={handleInputChange}
+                  required
+                  className="w-full py-2 px-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-300 transition duration-200 ease-in-out"
+                />
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Incomplete Story Points</label>
+                <input
+                  type="number"
+                  name="incomplete"
+                  value={formData.incomplete}
+                  onChange={handleInputChange}
+                  required
+                  className="w-full py-2 px-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-300 transition duration-200 ease-in-out"
+                />
+              </div>
+              <div className="flex justify-end">
+                <button type="button" onClick={closePopup} className="bg-gray-400 text-white py-2 px-3 rounded-md hover:bg-gray-500 transition mr-2">
+                  Cancel
+                </button>
+                <button type="submit" className="bg-blue-500 text-white py-2 px-3 rounded-md hover:bg-blue-600 transition">
+                  {isEditing ? "Update" : "Create"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -4,6 +4,7 @@ import { Dashboard } from './components/Dashboard';
 import Sprintdetails from './components/Sprintdetails';
 import Team from './components/Team';
 import Sprint from './components/Sprint';
+import Sprintstatus from './components/Sprintstatus';
 
 function App() {
   return (
@@ -13,9 +14,10 @@ function App() {
         <Route path="/sprint" element={<Sprint />} />
         <Route element={<Layout />}>
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/sprintstatus" element={<Sprintstatus />} />
           <Route path="/sprintdetails" element={<Sprintdetails />} />
         </Route>
-        <Route path="/" element={<Navigate to="/dashboard" />} />
+        <Route path="/" element={<Navigate to="/team" />} />
       </Routes>
     </Router>
   );

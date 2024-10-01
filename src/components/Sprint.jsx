@@ -38,8 +38,6 @@ const Sprint = () => {
         const data = await response.json();
         console.log('Sprint created:', data);
         alert('Sprint created successfully!');
-
-        // Navigate to the dashboard after successful creation
         navigate('/dashboard');
       } else {
         alert('Failed to create sprint.');
@@ -48,10 +46,9 @@ const Sprint = () => {
       console.error('Error creating sprint:', error);
       alert('An error occurred. Please try again.');
     } finally {
-      setLoading(false); // Stop loading
+      setLoading(false); 
     }
   };
-
   return (
     <div className="flex flex-col md:flex-row h-screen bg-gray-100">
       <div className="flex-1 bg-white flex flex-col justify-center items-center p-8">
