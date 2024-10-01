@@ -1,13 +1,19 @@
 import React from 'react'
 import classNames from 'classnames'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import logo from '../../assets/logo.webp';
 import { HiOutlineLogout } from 'react-icons/hi'
 import { DASHBOARD_SIDEBAR_LINKS, DASHBOARD_SIDEBAR_BOTTOM_LINKS } from '../../lib/constants/Navigation';
+import { isLoggedIn } from '../../auth'
 
 const linkClass = 
 	'flex items-center gap-2 px-4 py-3 hover:bg-blue-600 hover:no-underline active:bg-blue-500 rounded-sm text-lg' 
 export default function Sidebar() {
+	const navigate = useNavigate();
+
+	const handleLogout = () => {
+        navigate('/team', { replace: true });
+    };
 	return (
 		<div className="bg-blue-700 w-64 p-4 flex flex-col"> 
 			<div className="flex items-center gap-2 px-1 py-3">
@@ -22,12 +28,15 @@ export default function Sidebar() {
 				{DASHBOARD_SIDEBAR_BOTTOM_LINKS.map((link) => (
 					<SidebarLink key={link.key} link={link} />
 				))}
-				<div className={classNames(linkClass, 'cursor-pointer text-white font-semibold')}>
-					<span className="text-xl">
-						<HiOutlineLogout />
-					</span>
-					Logout
-				</div>
+				<div
+                    className={classNames(linkClass, 'cursor-pointer text-white font-semibold')}
+                    onClick={handleLogout} 
+                >
+                    <span className="text-xl">
+                        <HiOutlineLogout />
+                    </span>
+                    Logout
+                </div>
 			</div>
 		</div>
 	)

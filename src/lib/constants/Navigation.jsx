@@ -30,13 +30,13 @@ export const DASHBOARD_SIDEBAR_LINKS = [
 	{
 		key: 'velocity',
 		label: 'Velocity',
-		path: '/Team',
+		path: '/Velocity',
 		icon: <HiOutlineTrendingUp />,
 	},
 	{
-		key: 'productionpipeline',
+		key: 'pipeline',
 		label: 'Pipelines',
-		// path: '/Sprint',
+		path: '/Pipeline',
 		icon: <HiOutlineChartSquareBar />
 	},
 ]

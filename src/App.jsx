@@ -5,6 +5,9 @@ import Sprintdetails from './components/Sprintdetails';
 import Team from './components/Team';
 import Sprint from './components/Sprint';
 import Sprintstatus from './components/Sprintstatus';
+import Velocity from './components/Velocity';
+import Pipeline from './components/Pipeline';
+
 
 function App() {
   return (
@@ -16,6 +19,8 @@ function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/sprintstatus" element={<Sprintstatus />} />
           <Route path="/sprintdetails" element={<Sprintdetails />} />
+          <Route path="/velocity" element={<Velocity />} />
+          <Route path="/pipeline" element={<Pipeline />} />
         </Route>
         <Route path="/" element={<Navigate to="/team" />} />
       </Routes>

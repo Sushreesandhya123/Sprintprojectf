@@ -56,16 +56,16 @@ export const Sprintstatus = () => {
           <table className="w-full text-left table-auto">
             <thead className="bg-blue-200">
               <tr>
-                <th className="px-4 py-2 text-center">Id</th>
+                <th className="px-4 py-2 text-center">SL No</th>
                 <th className="px-4 py-2 text-center">Description</th>
                 <th className="px-4 py-2 text-center">Status</th>
                 <th className="px-4 py-2 text-center">Action</th>
               </tr>
             </thead>
             <tbody>
-              {data.map((item) => ( 
+            {data.map((item, index) => (
                 <tr key={item.id}>
-                  <td className="border px-4 py-2 text-center">{item.id}</td>
+                  <td className="border px-4 py-2 text-center">{index + 1}</td>
                   <td className="border px-4 py-2 text-center">{item.description}</td>
                   <td className="border px-4 py-2 text-center">{item.status}</td>
                   <td className="border px-4 py-2 text-center">
@@ -86,7 +86,7 @@ export const Sprintstatus = () => {
           <table className="w-full text-left table-auto">
             <thead className="bg-green-200">
               <tr>
-                <th className="px-4 py-2">Id</th>
+                <th className="px-4 py-2">SL No</th>
                 <th className="px-4 py-2">Planned US</th>
                 <th className="px-4 py-2">Completed US</th>
                 <th className="px-4 py-2">Incomplete US</th>
@@ -98,9 +98,9 @@ export const Sprintstatus = () => {
               </tr>
             </thead>
             <tbody>
-              {sprintProgressData.map((item) => (
-                <tr key={item.id}>
-                  <td className="border px-4 py-2 text-center">{item.progress_id}</td>
+            { sprintProgressData.map((item, index) => (
+                <tr key={item.progress_id}>
+                  <td className="border px-4 py-2 text-center">{index + 1}</td>
                   <td className="border px-4 py-2 text-center">{item.planned_user_stories}</td>
                   <td className="border px-4 py-2 text-center">{item.completed_user_stories}</td>
                   <td className="border px-4 py-2 text-center">{item.incomplete_user_stories}</td>

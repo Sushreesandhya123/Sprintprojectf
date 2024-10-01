@@ -1,10 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import ReactQuill from 'react-quill'; 
+import 'react-quill/dist/quill.snow.css'; 
 
 const Sprintdetails = () => {
   const [imageSrc, setImageSrc] = useState(null);
   const [showPopup, setShowPopup] = useState(false);
-  const [appName, setAppName] = useState('');
-  const [releaseNumber, setReleaseNumber] = useState('');
+  const [richText, setRichText] = useState(''); 
+  const [blockers, setBlockers] = useState([]);
+  const [selectedBlocker, setSelectedBlocker] = useState(null);
 
   const handleImageUpload = (event) => {
     const file = event.target.files[0];
@@ -29,22 +32,102 @@ const Sprintdetails = () => {
     event.preventDefault();
   };
 
-  const togglePopup = () => {
-    setShowPopup(!showPopup);
+  useEffect(() => {
+    fetchBlockers();
+  }, []);
+
+  const fetchBlockers = async () => {
+    try {
+      const response = await fetch('http://127.0.0.1:8000/Blockers/blockers/');
+      const data = await response.json();
+      setBlockers(data);
+    } catch (error) {
+      console.error('Error fetching blockers:', error);
+    }
   };
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    togglePopup();
+  const createBlocker = async () => {
+    try {
+      const response = await fetch('http://127.0.0.1:8000/Blockers/blockers/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ description: richText }),
+      });
+      const newBlocker = await response.json();
+      setBlockers((prevBlockers) => [...prevBlockers, newBlocker]);
+      togglePopup();
+      setRichText(''); // Reset rich text field after submission
+    } catch (error) {
+      console.error('Error creating blocker:', error);
+    }
+  };
+
+  const updateBlocker = async (blockerId) => {
+    try {
+      const response = await fetch(`http://127.0.0.1:8000/Blockers/blockers/${blockerId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ description: richText }),
+      });
+      const updatedBlocker = await response.json();
+      setBlockers((prevBlockers) =>
+        prevBlockers.map((blocker) =>
+          blocker.blocker_id === updatedBlocker.blocker_id ? updatedBlocker : blocker
+        )
+      );
+      togglePopup();
+      setRichText(''); // Reset rich text field after submission
+    } catch (error) {
+      console.error('Error updating blocker:', error);
+    }
+  };
+
+  const deleteBlocker = async (blockerId) => {
+    try {
+      await fetch(`http://127.0.0.1:8000/Blockers/blockers/${blockerId}`, {
+        method: 'DELETE',
+      });
+      setBlockers((prevBlockers) => prevBlockers.filter((blocker) => blocker.blocker_id !== blockerId));
+    } catch (error) {
+      console.error('Error deleting blocker:', error);
+    }
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (selectedBlocker) {
+      updateBlocker(selectedBlocker.blocker_id);
+    } else {
+      createBlocker();
+    }
+  };
+
+  const handleEdit = (blocker) => {
+    setSelectedBlocker(blocker);
+    setRichText(blocker.description); 
+    setShowPopup(true); 
+  };
+
+  const togglePopup = () => {
+    setShowPopup(!showPopup);
+    if (!showPopup) {
+      setSelectedBlocker(null);
+      setRichText(''); 
+    }
   };
 
   return (
     <div className="p-4">
-      <div className="grid grid-cols-2 gap-4 mb-6 h-30">
+      {/* Image Upload Section */}
+      {!imageSrc ? (
         <div
           onDrop={handleDrop}
           onDragOver={handleDragOver}
-          className="border-2 border-dashed border-gray-300 p-4 flex justify-center items-center"
+          className="border-2 border-dashed border-blue-300 p-4 flex justify-center items-center mb-4"
         >
           <div className="text-center">
             <p className="mb-2 text-gray-500">Drag and drop an image or</p>
@@ -59,80 +142,78 @@ const Sprintdetails = () => {
             </label>
           </div>
         </div>
-        <div className="border-2 border-gray-300 p-4 flex justify-center items-center">
-          {imageSrc ? (
-            <img src={imageSrc} alt="Uploaded" className="max-h-64 object-contain" />
-          ) : (
-            <p className="text-gray-500">No image uploaded</p>
-          )}
+      ) : (
+        <div className="relative border-2 border-blue-300 p-4 mb-4 flex justify-center items-center">
+          <img src={imageSrc} alt="Uploaded" className="max-h-64 object-contain" />
+          <button
+            className="absolute bottom-4 right-4 bg-green-500 text-white py-2 px-4 rounded"
+            onClick={() => alert('Image saved!')}
+          >
+            Save
+          </button>
         </div>
-      </div>
-      <div className="bg-white shadow-md rounded p-4 relative">
-        <h2 className="text-xl font-bold mb-4">Production Pipeline Releases</h2>
-        <button
-          className="absolute top-4 right-4 bg-blue-500 text-white py-2 px-4 rounded"
-          onClick={togglePopup}
-        >
-          Add Production
-        </button>
+      )}
+
+      {/* Blockers Table */}
+      <div className="bg-white shadow-md rounded p-4">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-bold">Blockers</h2>
+          <button
+            className="bg-blue-500 text-white py-2 px-4 rounded"
+            onClick={togglePopup}
+          >
+            Add Blocker
+          </button>
+        </div>
         <table className="w-full text-left table-auto mt-4">
-          <thead className="bg-gray-200">
+          <thead className="bg-blue-200">
             <tr>
-              <th className="px-4 py-2">App</th>
-              <th className="px-4 py-2">Release Numbers</th>
+              <th className="px-4 py-2">SL No</th>
+              <th className="px-4 py-2">Description</th>
+              <th className="px-4 py-2">Action</th>
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td className="border px-4 py-2">Court Web App</td>
-              <td className="border px-4 py-2">#20240912.11</td>
-            </tr>
-            <tr>
-              <td className="border px-4 py-2">Court Standalone App – iOS</td>
-              <td className="border px-4 py-2">Version 1.0.19</td>
-            </tr>
-            <tr>
-              <td className="border px-4 py-2">Interpreter App - iOS</td>
-              <td className="border px-4 py-2">Version 1.0.28</td>
-            </tr>
-            <tr>
-              <td className="border px-4 py-2">Interpreter App – Android</td>
-              <td className="border px-4 py-2">Version 1.0.24</td>
-            </tr>
-            <tr>
-              <td className="border px-4 py-2">Interpreter App – Windows</td>
-              <td className="border px-4 py-2">Not released</td>
-            </tr>
-            <tr>
-              <td className="border px-4 py-2">Interpreter App – Web App</td>
-              <td className="border px-4 py-2">Released</td>
-            </tr>
+          {blockers.map((blocker, index) => ( /* Using index to generate serial number */
+              <tr key={blocker.blocker_id}>
+                <td className="border px-4 py-2">{index + 1}</td>
+                <td className="border px-4 py-2" style={{ whiteSpace: 'pre-wrap' }}>
+                  <div dangerouslySetInnerHTML={{ __html: blocker.description }} />
+                </td>
+                <td className="border px-4 py-2">
+                  <i 
+                    className="fa-solid fa-edit cursor-pointer text-green-500 mr-2" 
+                    onClick={() => handleEdit(blocker)}
+                    title="Edit Blocker"
+                  ></i>
+                  <i 
+                    className="fa-solid fa-trash cursor-pointer text-red-500" 
+                    onClick={() => deleteBlocker(blocker.blocker_id)} 
+                    title="Delete Blocker"
+                  ></i>
+                </td>
+              </tr>
+            ))}
           </tbody>
         </table>
       </div>
+
+      {/* Popup Form with Rich Text Editor */}
       {showPopup && (
-        <div className="fixed inset-0 bg-gray-800 bg-opacity-75 flex justify-center items-center">
-          <div className="bg-white p-6 rounded shadow-lg w-96">
-            <h2 className="text-xl font-bold mb-4">Add Production</h2>
+        <div className="fixed inset-0 bg-gray-800 bg-opacity-75 flex justify-center items-center z-50">
+          <div className="bg-white p-6 rounded shadow-lg w-1/3">
+            <h2 className="text-xl font-bold mb-4">
+              {selectedBlocker ? 'Edit Blocker' : 'Add Blocker'}
+            </h2>
             <form onSubmit={handleSubmit}>
               <div className="mb-4">
-                <label className="block text-gray-700 mb-2">App Name</label>
-                <input
-                  type="text"
-                  value={appName}
-                  onChange={(e) => setAppName(e.target.value)}
-                  className="w-full p-2 border border-gray-300 rounded"
-                  required
-                />
-              </div>
-              <div className="mb-4">
-                <label className="block text-gray-700 mb-2">Release Number</label>
-                <input
-                  type="text"
-                  value={releaseNumber}
-                  onChange={(e) => setReleaseNumber(e.target.value)}
-                  className="w-full p-2 border border-gray-300 rounded"
-                  required
+                <label className="block text-gray-700 mb-2">Description</label>
+                <ReactQuill
+                  theme="snow"
+                  value={richText}
+                  onChange={setRichText}
+                  className="mb-4"
+                  placeholder="Enter blocker description..."
                 />
               </div>
               <div className="flex justify-end">
@@ -147,7 +228,7 @@ const Sprintdetails = () => {
                   type="submit"
                   className="bg-blue-500 text-white py-2 px-4 rounded"
                 >
-                  Submit
+                  {selectedBlocker ? 'Update' : 'Add'}
                 </button>
               </div>
             </form>
